@@ -95,7 +95,7 @@ class Day12 extends GenericDay {
     return hasRightNeighbour(x, y, letter, map) && !visited[y][x + 1];
   }
 
-  bool hasUnvisitedUpperNeighbour(
+  bool hasUnvisitedTopNeighbour(
     int x,
     int y,
     String letter,
@@ -105,7 +105,7 @@ class Day12 extends GenericDay {
     return hasTopNeighbour(x, y, letter, map) && !visited[y - 1][x];
   }
 
-  bool hasUnvisitedLowerNeighbour(
+  bool hasUnvisitedBottomNeighbour(
     int x,
     int y,
     String letter,
@@ -126,8 +126,8 @@ class Day12 extends GenericDay {
   ) {
     return hasUnvisitedLeftNeighbour(x, y, letter, map, visited) ||
         hasUnvisitedRightNeighbour(x, y, letter, map, visited) ||
-        hasUnvisitedUpperNeighbour(x, y, letter, map, visited) ||
-        hasUnvisitedLowerNeighbour(x, y, letter, map, visited);
+        hasUnvisitedTopNeighbour(x, y, letter, map, visited) ||
+        hasUnvisitedBottomNeighbour(x, y, letter, map, visited);
   }
 
   // Get the perimeter of the current letter at pos x;y
@@ -161,10 +161,10 @@ class Day12 extends GenericDay {
       if (hasUnvisitedRightNeighbour(x, y, letter, map, visited)) {
         result.addAll(getAreaForLetter(x + 1, y, letter, map, visited));
       }
-      if (hasUnvisitedUpperNeighbour(x, y, letter, map, visited)) {
+      if (hasUnvisitedTopNeighbour(x, y, letter, map, visited)) {
         result.addAll(getAreaForLetter(x, y - 1, letter, map, visited));
       }
-      if (hasUnvisitedLowerNeighbour(x, y, letter, map, visited)) {
+      if (hasUnvisitedBottomNeighbour(x, y, letter, map, visited)) {
         result.addAll(getAreaForLetter(x, y + 1, letter, map, visited));
       }
       return result;
@@ -215,7 +215,7 @@ class Day12 extends GenericDay {
         );
         visitedNeighbour = true;
       }
-      if (hasUnvisitedUpperNeighbour(x, y, letter, map, visited)) {
+      if (hasUnvisitedTopNeighbour(x, y, letter, map, visited)) {
         result.addAll(
           addPerimeterToPrice(
               x,
@@ -228,7 +228,7 @@ class Day12 extends GenericDay {
         );
         visitedNeighbour = true;
       }
-      if (hasUnvisitedLowerNeighbour(x, y, letter, map, visited)) {
+      if (hasUnvisitedBottomNeighbour(x, y, letter, map, visited)) {
         result.addAll(
           addPerimeterToPrice(
               x,
@@ -271,9 +271,85 @@ class Day12 extends GenericDay {
     return calculatePriceWithPerimeter(inputData);
   }
 
+
+  bool hasTopLeftNeighbour(Position p, Set<Position> positions) {
+    return positions.contains(Position(p.x - 1, p.y - 1));
+  }
+
+  bool hasTopRightNeighbour(Position p, Set<Position> positions) {
+    return positions.contains(Position(p.x + 1, p.y - 1));
+  }
+
+  bool hasBottomRightNeighbour(Position p, Set<Position> positions) {
+    return positions.contains(Position(p.x + 1, p.y + 1));
+  }
+
+  bool hasBottomLeftNeighbour(Position p, Set<Position> positions) {
+    return positions.contains(Position(p.x - 1, p.y + 1));
+  }
+
+  bool hasLeftNeighbourPosition(Position p, Set<Position> positions) {
+    return positions.contains(Position(p.x - 1, p.y));
+  }
+
+  bool hasRightNeighbourPosition(Position p, Set<Position> positions) {
+    return positions.contains(Position(p.x + 1, p.y));
+  }
+
+  bool hasTopNeighbourPosition(Position p, Set<Position> positions) {
+    return positions.contains(Position(p.x, p.y - 1));
+  }
+
+  bool hasBottomNeighbourPosition(Position p, Set<Position> positions) {
+    return positions.contains(Position(p.x, p.y + 1));
+  }
+
+  int countNumberOfSides(Set<Position> positions) {
+    var total = 0;
+    for (final position in positions) {
+      var corners = 0;
+      if (!hasLeftNeighbourPosition(position, positions) && !hasTopNeighbourPosition(position, positions) ||
+          (!hasTopLeftNeighbour(position, positions) && hasLeftNeighbourPosition(position, positions) &&
+              hasTopNeighbourPosition(position, positions))) {
+        corners++;
+      }
+      if (!hasRightNeighbourPosition(position, positions) && !hasTopNeighbourPosition(position, positions) ||
+          (!hasTopRightNeighbour(position, positions) && hasRightNeighbourPosition(position, positions) &&
+              hasTopNeighbourPosition(position, positions))) {
+        corners++;
+      }
+      if (!hasRightNeighbourPosition(position, positions) && !hasBottomNeighbourPosition(position, positions) ||
+          (!hasBottomRightNeighbour(position, positions) && hasRightNeighbourPosition(position, positions) &&
+              hasBottomNeighbourPosition(position, positions))) {
+        corners++;
+      }
+      if (!hasLeftNeighbourPosition(position, positions) && !hasBottomNeighbourPosition(position, positions) ||
+          (!hasBottomLeftNeighbour(position, positions) && hasLeftNeighbourPosition(position, positions) &&
+              hasBottomNeighbourPosition(position, positions))) {
+        corners++;
+      }
+      total += corners;
+    }
+    return total;
+  }
+
   @override
   int solvePart2() {
-    // SHould do the same than above but add a check for the corners of the areas
-    return 0;
+    final inputData = parseInput();
+
+    // Almost same login as 1 but we need to count the number of sides
+    // So to do so, I'm  fetching the Area of each letter and then I'm counting the number of Corners for each area to get the total number of sides
+    final visited = List.generate(inputData.length, (_) => List.generate(inputData[0].length, (_) => false));
+    var totalPrice = 0;
+
+    for (var y = 0; y < inputData.length; y++) {
+      for (var x = 0; x < inputData[0].length; x++) {
+        if (!visited[y][x]) {
+          final area = getAreaForLetter(x, y, inputData[y][x], inputData, visited);
+          totalPrice += area.length * countNumberOfSides(area);
+        }
+      }
+    }
+    return totalPrice;
   }
 }
