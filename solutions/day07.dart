@@ -84,6 +84,7 @@ class Day07 extends GenericDay {
   }
 }
 
+// Thank you GPT for this, it improved the performance of the solution by a lot
 int concat(int a, int b) {
   if (b < 10) return a * 10 + b;
   if (b < 100) return a * 100 + b;
