@@ -1,29 +1,7 @@
 import 'dart:io';
 
-import 'package:meta/meta.dart';
-
 import '../utils/index.dart';
 import '../utils/utils.dart';
-
-// Easing the positions comparison
-@immutable
-class Position {
-  const Position(this.x, this.y);
-
-  final int x;
-  final int y;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Position &&
-          runtimeType == other.runtimeType &&
-          x == other.x &&
-          y == other.y;
-
-  @override
-  int get hashCode => x.hashCode ^ y.hashCode;
-}
 
 class Zone {
   Zone(this.size, this.perimeter);
@@ -51,7 +29,7 @@ class Day12 extends GenericDay {
   // On continue jusqu'à ce qu'on ne puisse plus aller nulle part avec la lettre actuelle
   // Quand c'est fait, on passe à la lettre suivante et on recommence l'algo ci-dessus
 
-  // CHeck if the position is in the array limits
+  // CHeck if the Pos is in the array limits
   bool inBounds(int x, int y, List<List<String>> map) {
     return x >= 0 && y >= 0 && y < map.length && x < map[y].length;
   }
@@ -141,16 +119,16 @@ class Day12 extends GenericDay {
     return perimeter;
   }
 
-  Set<Position> getAreaForLetter(
+  Set<Pos> getAreaForLetter(
     int x,
     int y,
     String letter,
     List<List<String>> map,
     List<List<bool>> visited,
   ) {
-    final result = <Position>{};
+    final result = <Pos>{};
     visited[y][x] = true;
-    result.add(Position(x, y));
+    result.add(Pos(x, y));
 
     if (!hasUnvisitedNeighbours(x, y, letter, map, visited)) {
       return result;
@@ -272,60 +250,60 @@ class Day12 extends GenericDay {
   }
 
 
-  bool hasTopLeftNeighbour(Position p, Set<Position> positions) {
-    return positions.contains(Position(p.x - 1, p.y - 1));
+  bool hasTopLeftNeighbour(Pos p, Set<Pos> Poss) {
+    return Poss.contains(Pos(p.x - 1, p.y - 1));
   }
 
-  bool hasTopRightNeighbour(Position p, Set<Position> positions) {
-    return positions.contains(Position(p.x + 1, p.y - 1));
+  bool hasTopRightNeighbour(Pos p, Set<Pos> Poss) {
+    return Poss.contains(Pos(p.x + 1, p.y - 1));
   }
 
-  bool hasBottomRightNeighbour(Position p, Set<Position> positions) {
-    return positions.contains(Position(p.x + 1, p.y + 1));
+  bool hasBottomRightNeighbour(Pos p, Set<Pos> Poss) {
+    return Poss.contains(Pos(p.x + 1, p.y + 1));
   }
 
-  bool hasBottomLeftNeighbour(Position p, Set<Position> positions) {
-    return positions.contains(Position(p.x - 1, p.y + 1));
+  bool hasBottomLeftNeighbour(Pos p, Set<Pos> Poss) {
+    return Poss.contains(Pos(p.x - 1, p.y + 1));
   }
 
-  bool hasLeftNeighbourPosition(Position p, Set<Position> positions) {
-    return positions.contains(Position(p.x - 1, p.y));
+  bool hasLeftNeighbourPos(Pos p, Set<Pos> Poss) {
+    return Poss.contains(Pos(p.x - 1, p.y));
   }
 
-  bool hasRightNeighbourPosition(Position p, Set<Position> positions) {
-    return positions.contains(Position(p.x + 1, p.y));
+  bool hasRightNeighbourPos(Pos p, Set<Pos> Poss) {
+    return Poss.contains(Pos(p.x + 1, p.y));
   }
 
-  bool hasTopNeighbourPosition(Position p, Set<Position> positions) {
-    return positions.contains(Position(p.x, p.y - 1));
+  bool hasTopNeighbourPos(Pos p, Set<Pos> Poss) {
+    return Poss.contains(Pos(p.x, p.y - 1));
   }
 
-  bool hasBottomNeighbourPosition(Position p, Set<Position> positions) {
-    return positions.contains(Position(p.x, p.y + 1));
+  bool hasBottomNeighbourPos(Pos p, Set<Pos> Poss) {
+    return Poss.contains(Pos(p.x, p.y + 1));
   }
 
-  int countNumberOfSides(Set<Position> positions) {
+  int countNumberOfSides(Set<Pos> Poss) {
     var total = 0;
-    for (final position in positions) {
+    for (final Pos in Poss) {
       var corners = 0;
-      if (!hasLeftNeighbourPosition(position, positions) && !hasTopNeighbourPosition(position, positions) ||
-          (!hasTopLeftNeighbour(position, positions) && hasLeftNeighbourPosition(position, positions) &&
-              hasTopNeighbourPosition(position, positions))) {
+      if (!hasLeftNeighbourPos(Pos, Poss) && !hasTopNeighbourPos(Pos, Poss) ||
+          (!hasTopLeftNeighbour(Pos, Poss) && hasLeftNeighbourPos(Pos, Poss) &&
+              hasTopNeighbourPos(Pos, Poss))) {
         corners++;
       }
-      if (!hasRightNeighbourPosition(position, positions) && !hasTopNeighbourPosition(position, positions) ||
-          (!hasTopRightNeighbour(position, positions) && hasRightNeighbourPosition(position, positions) &&
-              hasTopNeighbourPosition(position, positions))) {
+      if (!hasRightNeighbourPos(Pos, Poss) && !hasTopNeighbourPos(Pos, Poss) ||
+          (!hasTopRightNeighbour(Pos, Poss) && hasRightNeighbourPos(Pos, Poss) &&
+              hasTopNeighbourPos(Pos, Poss))) {
         corners++;
       }
-      if (!hasRightNeighbourPosition(position, positions) && !hasBottomNeighbourPosition(position, positions) ||
-          (!hasBottomRightNeighbour(position, positions) && hasRightNeighbourPosition(position, positions) &&
-              hasBottomNeighbourPosition(position, positions))) {
+      if (!hasRightNeighbourPos(Pos, Poss) && !hasBottomNeighbourPos(Pos, Poss) ||
+          (!hasBottomRightNeighbour(Pos, Poss) && hasRightNeighbourPos(Pos, Poss) &&
+              hasBottomNeighbourPos(Pos, Poss))) {
         corners++;
       }
-      if (!hasLeftNeighbourPosition(position, positions) && !hasBottomNeighbourPosition(position, positions) ||
-          (!hasBottomLeftNeighbour(position, positions) && hasLeftNeighbourPosition(position, positions) &&
-              hasBottomNeighbourPosition(position, positions))) {
+      if (!hasLeftNeighbourPos(Pos, Poss) && !hasBottomNeighbourPos(Pos, Poss) ||
+          (!hasBottomLeftNeighbour(Pos, Poss) && hasLeftNeighbourPos(Pos, Poss) &&
+              hasBottomNeighbourPos(Pos, Poss))) {
         corners++;
       }
       total += corners;
