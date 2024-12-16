@@ -3,4 +3,9 @@ class Pair<F, S> {
 
   final F first;
   final S second;
+
+  @override
+  String toString() {
+    return 'Pair{first: $first, second: $second}';
+  }
 }
