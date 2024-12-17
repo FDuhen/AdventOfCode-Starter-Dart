@@ -58,7 +58,7 @@ class Day16 extends GenericDay {
 
   @override
   List<List<String>> parseInput() {
-    final file = File('input/aoc16x.txt');
+    final file = File('input/aoc16.txt');
     final content = file.readAsStringSync();
     return stringToStringMap(content);
   }
@@ -81,8 +81,9 @@ class Day16 extends GenericDay {
   // Return the new possible positions from the currentPos.
   // If there is only one Current Position returned, no subsegment should be created
   // Returns empty list on dead end or on loop
-  List<CurrentPosition> getPossibleDirections(List<List<String>> maze, CurrentPosition currentPos, Map<String, CurrentPosition> positionHistory) {
+  List<CurrentPosition> getPossibleDirections(List<List<String>> maze, CurrentPosition currentPos, Segment currentSegment, Map<String, CurrentPosition> blacklistedPositions) {
     final possiblePositions = List<CurrentPosition>.empty(growable: true);
+    final positionHistory = currentSegment.positionHistory;
 
     for (final direction in directions) {
       final modifiers = getDirectionsModifiers(direction);
@@ -100,7 +101,7 @@ class Day16 extends GenericDay {
 
       final key = '$x,$y';
       // We can't go back to a previous position
-      if (positionHistory.containsKey(key)) {
+      if (positionHistory.containsKey(key) || blacklistedPositions.containsKey(key)) {
         continue;
       }
 
@@ -111,6 +112,7 @@ class Day16 extends GenericDay {
       // Don't add the end to the history
       if (nextPos != 'E') {
         positionHistory[key] = newCurrentPos;
+        currentSegment.positionHistory = positionHistory;
       }
     }
 
@@ -146,6 +148,7 @@ class Day16 extends GenericDay {
     final endPosition = getLetterIndex(input, 'E');
     final initialPos = CurrentPosition(startPosition.x, startPosition.y, null);
     final startSegment = Segment([initialPos], [], false, false,{}, parentSegment: Segment([], [], false, false, {}));
+    final blacklistedPositions = <String, CurrentPosition>{};
 
     final toExplore = QueueList<Segment>();
     toExplore.add(startSegment);
@@ -160,13 +163,17 @@ class Day16 extends GenericDay {
       final segment = toExplore.removeFirst();
       final currentPos = segment.positions.last;
 
-      final possibleDirections = getPossibleDirections(input, currentPos, segmentHistory);
+      final possibleDirections = getPossibleDirections(input, currentPos, segment, blacklistedPositions);
       // Dead end, or loop
       if (possibleDirections.isEmpty) {
         // May be on the position of the end, so its a win
         if (currentPos.x == endPosition.x && currentPos.y == endPosition.y) {
           segment.isEnd = true;
         } else {
+          for (final pos in segment.positions) {
+            blacklistedPositions['${pos.x},${pos.y}'] = pos;
+          }
+          print('blocked and ${blacklistedPositions.length}');
           segment.isBlocked = true;
         }
         continue;
@@ -194,7 +201,7 @@ class Day16 extends GenericDay {
         }
 
         // TODO position History
-        final newSegment = Segment([direction], [], false, false, {}, parentSegment: segment);
+        final newSegment = Segment([direction], [], false, false, Map.from(segment.positionHistory), parentSegment: segment);
         segment.subSegments.add(newSegment);
         toExplore.add(newSegment);
       }
