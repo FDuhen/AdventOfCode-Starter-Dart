@@ -21,7 +21,7 @@ class Day17 extends GenericDay {
 
   @override
   Program parseInput() {
-    final file = File('input/aoc17.txt');
+    final file = File('input/aoc17x.txt');
     final content = file.readAsStringSync();
 
     // Parse the input
@@ -80,7 +80,6 @@ class Day17 extends GenericDay {
         program.c = (numerator/denominator).truncate();
     }
 
-    print(program.currentInstruction);
     program.currentInstruction += 2;
   }
 
@@ -107,7 +106,6 @@ class Day17 extends GenericDay {
   @override
   int solvePart1() {
     final program = parseInput();
-
     try {
       while(true) {
         final instruction = program.program[program.currentInstruction];
@@ -126,6 +124,35 @@ class Day17 extends GenericDay {
 
   @override
   int solvePart2() {
-    return 0;
+    var program = parseInput();
+
+    var hasFoundSolution = false;
+    var iteration = 10096774265;
+    program.a = iteration;
+
+    while (!hasFoundSolution) {
+      print('Iteration $iteration');
+      try {
+        while(true) {
+          final instruction = program.program[program.currentInstruction];
+          final code = OPCode.values[instruction];
+          final operand = program.program[program.currentInstruction + 1];
+
+          executeOPCode(code, operand, program);
+        }
+      } catch (e) {
+        final result = program.outputs.join(',');
+        if (result == program.program.join(',')) {
+          hasFoundSolution = true;
+          print('SOLUTION IS : $iteration');
+        } else {
+          iteration++;
+          program = parseInput();
+          program.a = iteration;
+        }
+      }
+    }
+
+      return 0;
   }
 }
