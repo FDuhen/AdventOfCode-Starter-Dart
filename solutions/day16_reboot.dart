@@ -26,8 +26,8 @@ class CurrentPosition {
 }
 
 
-class Day16 extends GenericDay {
-  Day16() : super(16);
+class Day16Bis extends GenericDay {
+  Day16Bis() : super(16);
 
   static const dirTop = '^';
   static const dirLeft = '<';
@@ -71,6 +71,7 @@ class Day16 extends GenericDay {
   @override
   int solvePart1() {
     final input = parseInput();
+    // Stocker un hshset de positions ac clé = position  et valeur =pondéraiton pr rejoindre
 
     return 0;
   }
