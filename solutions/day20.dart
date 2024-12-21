@@ -2,19 +2,34 @@ import 'dart:io';
 
 import '../utils/index.dart';
 import '../utils/maze.dart';
-import '../utils/pair.dart';
 
 class Shortcut {
   final Pos start;
   final Pos end;
   final Pos wall;
+  final int? cheatDistance;
 
-  Shortcut(this.start, this.end, this.wall);
+  Shortcut(this.start, this.end, this.wall, {this.cheatDistance});
 
   @override
   String toString() {
     return 'Shortcut{start: $start, end: $end, wall: $wall}';
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Shortcut &&
+          runtimeType == other.runtimeType &&
+          start == other.start &&
+          end == other.end) ||
+      (other is Shortcut &&
+          runtimeType == other.runtimeType &&
+          start == other.end &&
+          end == other.start);
+
+  @override
+  int get hashCode => (start.hashCode ^ end.hashCode) + (end.hashCode ^ start.hashCode);
 }
 
 class Day20 extends GenericDay {
@@ -82,6 +97,50 @@ class Day20 extends GenericDay {
     return shortcuts;
   }
 
+
+  // Return a Shortcut as Pair of Pos
+  // First Pos = Shortcut
+  // Second Pos = track reached
+  List<Shortcut> getBigShortcuts(Maze track, Pos pos) {
+    const maxShortcut = 20;
+    // Creating a square of 20x20 around the current position and checking
+    // All the values in it
+    final rangeX = List.generate(
+      maxShortcut * 2 + 1,
+          (index) => index - maxShortcut,
+    );
+    final rangeY = [...rangeX];
+    final shortcuts = List<Shortcut>.empty(growable: true);
+
+    for (final x in rangeX) {
+      for (final y in rangeY) {
+        try {
+          final shortcutPos = Pos(pos.x + x, pos.y + y);
+          if (track.grid[shortcutPos.x][shortcutPos.y] == '.' || track.grid[shortcutPos.x][shortcutPos.y] == 'E') {
+            if (isInRange(pos, shortcutPos, maxShortcut)) {
+              final newShortcut = Shortcut(pos, shortcutPos, const Pos(-1, -1), cheatDistance: getDistance(pos, shortcutPos));
+              if (!shortcuts.contains(newShortcut)) {
+                shortcuts.add(newShortcut);
+              }
+            }
+          }
+        } catch (e) {
+          continue;
+        }
+
+      }
+    }
+
+    return shortcuts;
+  }
+
+
+  bool isInRange(Pos pos, Pos shortcutPos, int maxShortcut) {
+    return getDistance(pos, shortcutPos) <= maxShortcut;
+  }
+
+  int getDistance(Pos pos, Pos shortcutPos) => (pos.x - shortcutPos.x).abs() + (pos.y - shortcutPos.y).abs();
+
   // Remove the bi-directional shortcuts to keep only one
   void cleanupShortcuts(List<Shortcut> shortcuts) {
     for (var i = 0; i < shortcuts.length; i++) {
@@ -121,7 +180,6 @@ class Day20 extends GenericDay {
 
 
       if (diff >= 100) {
-        print('Found big $shortcut of $diff');
         count++;
       }
     }
@@ -132,8 +190,34 @@ class Day20 extends GenericDay {
 
   @override
   int solvePart2() {
+    final input = parseInput();
+    final track = Maze(input);
+    final start = track.getPosOf('S');
+    final end = track.getPosOf('E');
 
-    return 0;
+    final path = getPath(track, start, end);
+
+    final shortcuts = <Shortcut>{};
+    for (var i = 0; i < path.length; i++) {
+      final currentPos = path[i];
+      shortcuts.addAll(getBigShortcuts(track, currentPos));
+    }
+
+    var count = 0;
+    for (final shortcut in shortcuts) {
+      final firstIndex = path.indexOf(shortcut.start);
+      final secondIndex = path.indexOf(shortcut.end);
+      final diff = (secondIndex - firstIndex).abs() - (shortcut.cheatDistance!);
+
+
+      if (diff >= 100) {
+        count++;
+      }
+    }
+
+    // 2084322 too high
+    // 997879
+    return count;
   }
 }
 
