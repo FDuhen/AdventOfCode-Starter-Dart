@@ -57,7 +57,7 @@ class Day22 extends GenericDay {
     final aggregatedPrices = <(int, int, int, int), int>{};
 
     for (final monkey in monkeys) {
-      final listPrices = getPrices(monkey, 2000).reversed.toList();
+      final listPrices = getPrices(monkey, 2001).reversed.toList();
 
       final prices = <(int, int, int, int), int>{};
       final changes = <int>[];
@@ -78,7 +78,7 @@ class Day22 extends GenericDay {
     }
 
 
-    // 2039 is wrong, too low
+    // 2039 is wrong, too low ??? Idk why
     return aggregatedPrices.values.reduce(math.max);
   }
 }
