@@ -40,11 +40,18 @@ class Holder {
 
     return false;
   }
+
+  bool containsPair(String first, String second) =>
+      names.contains(first) && names.contains(second);
+
+  void add(String name) {
+    names.add(name);
+  }
 }
 
 class Day23 extends GenericDay {
   Day23() : super(23);
-  final file = File('input/aoc23x.txt');
+  final file = File('input/aoc23.txt');
 
   @override
   List<Holder> parseInput() {
@@ -82,7 +89,6 @@ class Day23 extends GenericDay {
         final holder = pairs[j];
         if (holder.names.contains(computer)) {
           dict[computer] ??= <String>{};
-          // Careful, will have the current computer in the names
           for(final name in holder.names) {
             if (name != computer) {
               dict[computer]!.add(name);
@@ -136,23 +142,45 @@ class Day23 extends GenericDay {
     }
 
     final validHolders = <Holder>{};
-    for (var i = 0; i < pairs.length; i++) {
-      final holder = pairs.elementAt(i);
-      final firstSet = dict[holder.names.first];
-      final secSet = dict[holder.names.last];
+    for (final computer in dict.entries) {
+      final connections = computer.value;
+      for (final connection in connections) {
+        final existingGroups = validHolders
+            .where((g) => g.containsPair(computer.key, connection))
+            .toList();
 
-      if (firstSet != null && secSet != null) {
-        final uncommons = firstSet.difference(secSet)..removeWhere((e) => e.contains(holder.names.first) || e.contains(holder.names.last));
-        for (final uncommon in uncommons) {
-          if (firstSet.contains(uncommon) && secSet.contains(uncommon)) {
-            // Replace this with recursive function
+        if (existingGroups.isEmpty) {
+          final set = <String>{}
+            ..add(computer.key)
+            ..add(connection);
+          final group = Holder(set);
+          validHolders.add(group);
+          continue;
+        }
+
+        for (final existingGroup in existingGroups) {
+          final allPotentialConnections = existingGroup.names
+              .fold(<String>{}, (e, v) => e.union(dict[v]!)).where(
+                  (c) => !existingGroup.names.contains(c));
+
+          for (final potentialConnection in allPotentialConnections) {
+            if (existingGroup.names
+                .every((c) => dict[c]!.contains(potentialConnection))) {
+              validHolders.remove(existingGroup);
+              existingGroup.add(potentialConnection);
+              validHolders.add(existingGroup);
+            }
           }
         }
       }
     }
 
-    // TODO recursive funct with memoization and depth search
-    return validHolders.where((e) => e.names.length >= 3 && e.isValid()).length;
+    final biggestHolder = validHolders
+        .sorted((a, b) => b.names.length.compareTo(a.names.length))
+        .first;
+
+    print(biggestHolder.names.sorted((a, b) => a.compareTo(b),).join(','));
+    return 0;
   }
 }
 
