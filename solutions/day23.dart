@@ -44,7 +44,7 @@ class Holder {
 
 class Day23 extends GenericDay {
   Day23() : super(23);
-  final file = File('input/aoc23.txt');
+  final file = File('input/aoc23x.txt');
 
   @override
   List<Holder> parseInput() {
@@ -114,8 +114,45 @@ class Day23 extends GenericDay {
 
   @override
   int solvePart2() {
+    final pairs = parseInput();
 
-    return 0;
+    final dict = <String, Set<String>>{};
+    final computers = getUniqueComputers();
+
+    for (var i = 0; i < computers.length; i++) {
+      final computer = computers.elementAt(i);
+
+      for (var j = 0; j < pairs.length; j++) {
+        final holder = pairs[j];
+        if (holder.names.contains(computer)) {
+          dict[computer] ??= <String>{};
+          for(final name in holder.names) {
+            if (name != computer) {
+              dict[computer]!.add(name);
+            }
+          }
+        }
+      }
+    }
+
+    final validHolders = <Holder>{};
+    for (var i = 0; i < pairs.length; i++) {
+      final holder = pairs.elementAt(i);
+      final firstSet = dict[holder.names.first];
+      final secSet = dict[holder.names.last];
+
+      if (firstSet != null && secSet != null) {
+        final uncommons = firstSet.difference(secSet)..removeWhere((e) => e.contains(holder.names.first) || e.contains(holder.names.last));
+        for (final uncommon in uncommons) {
+          if (firstSet.contains(uncommon) && secSet.contains(uncommon)) {
+            // Replace this with recursive function
+          }
+        }
+      }
+    }
+
+    // TODO recursive funct with memoization and depth search
+    return validHolders.where((e) => e.names.length >= 3 && e.isValid()).length;
   }
 }
 
