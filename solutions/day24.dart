@@ -71,7 +71,6 @@ class Day24 extends GenericDay {
   @override
   int solvePart1() {
     final game = parseInput();
-
     final queue = [...game.instructions];
 
     while (queue.isNotEmpty) {

@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_function_literals_in_foreach_calls
 
+import 'solutions/day16_reboot.dart';
 import 'solutions/index.dart';
 import 'tool/generic_day.dart';
 
@@ -30,6 +31,7 @@ final days = <GenericDay>[
   Day24(),
   Day22(),
   Day25(),
+  Day16Bis(),
 ];
 
 void main(List<String?> args) {
